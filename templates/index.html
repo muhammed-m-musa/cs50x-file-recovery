@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة التحكم: ملخص المجلدات المسترجعة</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; margin: 40px; background-color: #f9f9f9; color: #333; }
+        h1 { color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background-color: #3498db; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .upload-box { background: #fff; padding: 20px; border: 2px dashed #3498db; display: inline-block; margin-top: 20px; border-radius: 8px; }
+        button { background-color: #2ecc71; color: white; border: none; padding: 10px 20px; cursor: pointer; font-size: 16px; border-radius: 4px; }
+        button:hover { background-color: #27ae60; }
+        .download-btn { background-color: #3498db; padding: 6px 14px; font-size: 14px; }
+        .download-btn:hover { background-color: #2980b9; }
+        .reset-btn { background-color: #e74c3c; padding: 10px 20px; font-size: 16px; border-radius: 4px; }
+        .reset-btn:hover { background-color: #c0392b; }
+    </style>
+</head>
+<body>
+
+    <h1>لوحة التحكم: ملخص المجلدات المسترجعة</h1>
+
+    <!-- عرض رسائل التنبيه (Flash Messages) القادمة من الـ Backend -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div style="margin: 15px 0;">
+          {% for category, message in messages %}
+            <div style="padding: 12px; border-radius: 6px; margin-bottom: 8px; font-weight: bold;
+              {% if category == 'success' %} background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc;
+              {% elif category == 'danger' %} background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7;
+              {% else %} background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; {% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- التحقق من وجود مجلدات ملخصة -->
+    {% if folders %}
+        <p>تم تنظيم واسترجاع الملفات بنجاح وتوزيعها كالتالي:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>اسم المجلد (النوع)</th>
+                    <th>عدد الملفات</th>
+                    <th>الحجم الإجمالي</th>
+                    <th>التنزيل</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for folder in folders %}
+                <tr>
+                    <td><strong>{{ folder.folder_type | upper }}</strong></td>
+                    <td>{{ folder.file_count }} ملف</td>
+                    <td>{{ folder.formatted_size }}</td>
+                    <td>
+                        <a href="/download/{{ folder.folder_type }}">
+                            <button class="download-btn" type="button">تحميل كـ ZIP</button>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <br><br>
+        <!-- تم تحويل زر Reset إلى نموذج POST آمن تماماً كما اتفقنا -->
+        <form action="/reset" method="POST" style="display: inline;">
+            <button type="submit" class="reset-btn">إعادة ضبط ورفع ملف RAW جديد</button>
+        </form>
+
+    {% else %}
+        <!-- إذا كانت قاعدة البيانات فارغة تماماً يظهر هذا الصندوق -->
+        <div class="upload-box">
+            <p>لا توجد أي ملفات مسترجعة حالياً.</p>
+            <p><strong>الرجاء رفع ملف الـ RAW لبدء العمل:</strong></p>
+
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <input type="file" name="raw_file" required>
+                <br><br>
+                <button type="submit">رفع واسترجاع الملفات</button>
+            </form>
+        </div>
+    {% endif %}
+
+</body>
+</html>
